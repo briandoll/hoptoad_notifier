@@ -30,7 +30,7 @@ module HoptoadNotifier
 
   class << self
     attr_accessor :host, :port, :secure, :api_key, :http_open_timeout, :http_read_timeout,
-                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :output
+                  :proxy_host, :proxy_port, :proxy_user, :proxy_pass, :output, :private_environments
 
     def backtrace_filters
       @backtrace_filters ||= []
@@ -140,6 +140,20 @@ module HoptoadNotifier
       elsif defined?(RAILS_DEFAULT_LOGGER)
         RAILS_DEFAULT_LOGGER
       end
+    end
+
+    # Returns the list of environments considered private
+    # Hoptoad will not send exceptions when running in these environments
+    # You may add custom environments to this list when calling configure:
+    # 
+    # HoptoadNotifier.configure do |config|
+    #   config.api_key = '1234567890abcdef'
+    #   config.private_environments  << ['secret','super-secret']
+    # end
+    def private_environments
+      @private_environments ||= ['development', 'test']
+      @private_environments.flatten!
+      @private_environments
     end
 
     # Call this method to modify defaults in your initializers.
@@ -255,7 +269,7 @@ module HoptoadNotifier
     private
 
     def public_environment? #nodoc:
-      defined?(RAILS_ENV) and !['development', 'test'].include?(RAILS_ENV)
+      defined?(RAILS_ENV) and !private_environments.include?(RAILS_ENV)
     end
 
     def ignore?(exception) #:nodoc:

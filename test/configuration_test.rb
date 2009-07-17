@@ -28,6 +28,7 @@ class ConfigurationTest < Test::Unit::TestCase
         config.proxy_pass = 'secret'
         config.http_open_timeout = 2
         config.http_read_timeout = 5
+        config.private_environments << ['private']
       end
 
       assert_equal "host",              HoptoadNotifier.host
@@ -44,6 +45,7 @@ class ConfigurationTest < Test::Unit::TestCase
                    HoptoadNotifier.ignore_user_agent
       assert_equal HoptoadNotifier::IGNORE_DEFAULT + [RuntimeError], 
                    HoptoadNotifier.ignore
+      assert_contains HoptoadNotifier.private_environments, 'private'
     end
 
     should "set a default host" do
